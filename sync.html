@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Scout Sync — Data Receiver</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',system-ui,sans-serif;background:#08080f;color:#e0e0e0;min-height:100vh;padding:16px;-webkit-text-size-adjust:100%}
+.hdr{text-align:center;padding:24px 0 16px}
+.hdr h1{font-size:24px;background:linear-gradient(135deg,#22c55e,#00d4ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.hdr p{color:#777;font-size:13px}
+.card{background:linear-gradient(145deg,#13132a,#0f0f22);border:1px solid #1f1f3a;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 4px 24px rgba(0,0,0,0.5)}
+.card h2{font-size:17px;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.desc{font-size:13px;color:#999;line-height:1.6;margin:6px 0 12px}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px;transition:transform 0.15s;text-align:center}
+.btn:active{transform:scale(0.97)}
+.btn-green{background:linear-gradient(135deg,#22c55e,#16a34a);color:white;box-shadow:0 4px 20px rgba(34,197,94,0.25)}
+.btn-blue{background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;box-shadow:0 4px 20px rgba(59,130,246,0.25)}
+.btn-purple{background:linear-gradient(135deg,#7c3aed,#5b21b6);color:white}
+.btn-red{background:linear-gradient(135deg,#ef4444,#dc2626);color:white}
+textarea{width:100%;min-height:140px;background:#0a0a14;border:1px solid #252540;border-radius:10px;padding:12px;font-family:'SF Mono',Menlo,monospace;font-size:12px;color:#7dd3fc;line-height:1.5;resize:vertical}
+textarea:focus{outline:none;border-color:#7c3aed}
+input[type=file]{display:none}
+.file-label{display:block;padding:14px;background:#1a1a32;border:2px dashed #333;border-radius:12px;text-align:center;color:#888;font-size:14px;cursor:pointer;transition:border-color 0.2s}
+.file-label:active{border-color:#7c3aed}
+.status-box{background:#0a0a14;border:1px solid #252540;border-radius:10px;padding:14px;margin-top:12px;font-family:'SF Mono',Menlo,monospace;font-size:12px;line-height:1.8;max-height:300px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.s-ok{color:#4ade80}
+.s-fail{color:#f87171}
+.s-warn{color:#fbbf24}
+.s-info{color:#60a5fa}
+.divider{height:1px;background:linear-gradient(90deg,transparent,#333,transparent);margin:20px 0}
+.stat{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+.stat-item{background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);border-radius:12px;padding:10px 16px;text-align:center;min-width:80px}
+.stat-item .num{font-size:22px;font-weight:800;color:#c084fc}
+.stat-item .lbl{font-size:11px;color:#888;margin-top:2px}
+.note{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:12px;font-size:13px;color:#86efac;margin:12px 0}
+.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+a{color:#60a5fa;text-decoration:none}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>📥 Scout Sync Receiver</h1>
+  <p>Receives data from PlanHub bookmarklets → download as CSV/JSON</p>
+</div>
+
+<!-- AUTO-DETECT STATUS -->
+<div class="card" id="auto-card" style="display:none">
+  <h2>🚀 Auto-Detect</h2>
+  <div id="auto-status" class="note">Checking URL for incoming data...</div>
+</div>
+
+<!-- STATS -->
+<div class="card" id="stats-card" style="display:none">
+  <h2>📊 Data Summary</h2>
+  <div class="stat" id="stats-area"></div>
+</div>
+
+<!-- PASTE INPUT -->
+<div class="card">
+  <h2>📋 Paste Data</h2>
+  <p class="desc">For Clipboard Bridge (Method B): paste the copied JSON below.</p>
+  <textarea id="paste-input" placeholder='Paste the JSON data from the bookmarklet here...'></textarea>
+  <button class="btn btn-green" onclick="processPaste()">📤 Process & Sync</button>
+</div>
+
+<!-- FILE UPLOAD -->
+<div class="card">
+  <h2>📁 Upload JSON File</h2>
+  <p class="desc">For Download method (Method C): upload the downloaded .json file.</p>
+  <label class="file-label" id="file-label">
+    📂 Tap to select scout_*.json file
+    <input type="file" id="file-input" accept=".json,application/json" onchange="processFile(event)">
+  </label>
+</div>
+
+<div class="divider"></div>
+
+<!-- SYNC LOG -->
+<div class="card">
+  <h2>📡 Sync Log</h2>
+  <div class="status-box" id="log">
+    <span class="s-info">Waiting for data...</span>
+  </div>
+  <button class="btn btn-blue" id="sync-btn" style="display:none" onclick="syncToSupabase()">📥 Download Data</button>
+</div>
+
+<!-- RAW DATA VIEW -->
+<div class="card" id="raw-card" style="display:none">
+  <h2>🔍 Raw Captured Data</h2>
+  <p class="desc">If automatic sync fails, copy this and import manually.</p>
+  <textarea id="raw-output" readonly style="min-height:200px"></textarea>
+  <button class="btn btn-purple" onclick="copyRaw()">📋 Copy Raw Data</button>
+</div>
+
+<!-- BACK LINK -->
+<div class="card" style="text-align:center">
+  <a href="index.html">← Back to Scout Sync Hub</a>
+</div>
+
+<script>
+// ============================================================
+// CONFIGURATION
+// ============================================================
+// No backend needed — everything client-side on GitHub Pages
+
+var capturedData = null;
+var parsedRecords = [];
+
+// ============================================================
+// AUTO-DETECT: Check URL hash for incoming data
+// ============================================================
+function checkHash() {
+  var hash = location.hash.substring(1);
+  if (!hash) return;
+  
+  document.getElementById('auto-card').style.display = 'block';
+  var status = document.getElementById('auto-status');
+  
+  try {
+    var params = {};
+    hash.split('&').forEach(function(p) {
+      var kv = p.split('=');
+      params[kv[0]] = decodeURIComponent(kv.slice(1).join('='));
+    });
+    
+    if (params.d) {
+      status.innerHTML = '<span class="pulse">⏳ Decoding incoming data...</span>';
+      log('Received data via URL hash (' + params.d.length + ' chars)', 'info');
+      
+      // Handle chunked data
+      if (params.chunk !== undefined) {
+        handleChunk(params);
+        return;
+      }
+      
+      // Decode base64
+      var json = decodeURIComponent(escape(atob(params.d)));
+      var data = JSON.parse(json);
+      
+      status.innerHTML = '✅ Data received via Popup Sync!';
+      log('Decoded ' + JSON.stringify(data).length + ' bytes of data', 'ok');
+      processData(data);
+    }
+  } catch(e) {
+    status.innerHTML = '❌ Failed to decode: ' + e.message;
+    log('Decode error: ' + e.message, 'fail');
+  }
+}
+
+// ============================================================
+// CHUNK HANDLER (for large payloads split across multiple windows)
+// ============================================================
+var chunks = {};
+function handleChunk(params) {
+  var idx = parseInt(params.chunk);
+  var total = parseInt(params.total);
+  chunks[idx] = params.d;
+  
+  log('Received chunk ' + (idx + 1) + '/' + total, 'info');
+  
+  if (Object.keys(chunks).length === total) {
+    var full = '';
+    for (var i = 0; i < total; i++) full += chunks[i];
+    var json = decodeURIComponent(escape(atob(full)));
+    var data = JSON.parse(json);
+    processData(data);
+    log('All chunks assembled!', 'ok');
+    document.getElementById('auto-status').innerHTML = '✅ All chunks received and assembled!';
+  } else {
+    document.getElementById('auto-status').innerHTML = '⏳ Waiting for chunks... (' + Object.keys(chunks).length + '/' + total + ')';
+  }
+}
+
+// ============================================================
+// PASTE HANDLER
+// ============================================================
+function processPaste() {
+  var text = document.getElementById('paste-input').value.trim();
+  if (!text) { alert('Paste some data first!'); return; }
+  
+  try {
+    var data = JSON.parse(text);
+    log('Parsed pasted data: ' + JSON.stringify(data).length + ' bytes', 'ok');
+    processData(data);
+  } catch(e) {
+    log('JSON parse error: ' + e.message, 'fail');
+    alert('Invalid JSON! Make sure you copied the full output from the bookmarklet.');
+  }
+}
+
+// ============================================================
+// FILE HANDLER
+// ============================================================
+function processFile(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  
+  document.getElementById('file-label').textContent = '📄 ' + file.name;
+  log('Loading file: ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)', 'info');
+  
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      log('Parsed file data successfully', 'ok');
+      processData(data);
+    } catch(err) {
+      log('File parse error: ' + err.message, 'fail');
+      alert('Failed to parse JSON file.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ============================================================
+// PROCESS DATA — Extract companies/contacts from captured API responses
+// ============================================================
+function processData(data) {
+  capturedData = data;
+  parsedRecords = [];
+  
+  var captures = data.captured || data.d || [];
+  if (!Array.isArray(captures)) captures = [captures];
+  
+  var companiesSet = {};
+  var contactsSet = {};
+  var projectsSet = {};
+  
+  captures.forEach(function(item) {
+    var url = item.u || item.url || '';
+    var payload = item.j || item.data || item;
+    
+    // Extract from project search results
+    if (url.indexOf('projects/search') > -1 || url.indexOf('get-filtered') > -1) {
+      var projects = extractArray(payload, ['result', 'projects', 'data']);
+      projects.forEach(function(p) {
+        if (p.id) projectsSet[p.id] = {
+          planhub_id: String(p.id),
+          name: p.name || p.project_name || '',
+          city: p.city || '',
+          state: p.state || '',
+          zip: p.zip || '',
+          status: p.status || '',
+          building_use: p.building_use || '',
+          gc_name: p.company_name || p.user_name || ''
+        };
+      });
+    }
+    
+    // Extract from activity tracker (subcontractors)
+    if (url.indexOf('ActivityTracker') > -1) {
+      var subs = extractArray(payload, ['data.data', 'data', 'result']);
+      subs.forEach(function(s) {
+        var cid = s.company_id || s.id;
+        if (cid) {
+          companiesSet[cid] = {
+            planhub_id: String(cid),
+            company_name: s.company_name || s.name || '',
+            source: 'planhub_tracker'
+          };
+        }
+      });
+    }
+    
+    // Extract from company profile
+    if (url.indexOf('/company/') > -1 && url.indexOf('/profile') > -1) {
+      var prof = payload.profile || payload;
+      var co = prof.company || prof;
+      if (co && (co.email || co.phone || co.name)) {
+        var id = co.id || url.match(/company\/(\d+)/)?.[1] || '';
+        companiesSet[id] = {
+          planhub_id: String(id),
+          company_name: co.name || '',
+          email: co.email || '',
+          phone: co.phone || '',
+          address: co.address || '',
+          city: co.city || '',
+          state: co.state || '',
+          zip: co.zip || co.zipcode || '',
+          website: co.website || '',
+          source: 'planhub_profile',
+          last_enriched_at: new Date().toISOString()
+        };
+        if (co.email || co.phone) {
+          var name = ((co.first_name || '') + ' ' + (co.last_name || '')).trim();
+          contactsSet[id] = {
+            name: name,
+            email: co.email || '',
+            phone: co.phone || '',
+            company: co.name || ''
+          };
+        }
+      }
+    }
+    
+    // Extract from project details
+    if (url.indexOf('get-details') > -1 || url.indexOf('project/') > -1) {
+      var det = payload.result || payload;
+      if (det && det.id) {
+        projectsSet[det.id] = Object.assign(projectsSet[det.id] || {}, {
+          planhub_id: String(det.id || det.gc_id),
+          name: det.name || det.project_name || '',
+          estimated_value: det.value || det.estimated_value || '',
+          description: (det.desc || det.description || '').substring(0, 500)
+        });
+      }
+    }
+  });
+  
+  parsedRecords = {
+    companies: Object.values(companiesSet),
+    contacts: Object.values(contactsSet),
+    projects: Object.values(projectsSet)
+  };
+  
+  // Show stats
+  showStats(parsedRecords);
+  
+  // Show raw data
+  document.getElementById('raw-card').style.display = 'block';
+  document.getElementById('raw-output').value = JSON.stringify(parsedRecords, null, 2);
+  
+  log('Extracted: ' + parsedRecords.companies.length + ' companies, ' + 
+      parsedRecords.contacts.length + ' contacts, ' + 
+      parsedRecords.projects.length + ' projects', 'ok');
+  
+  // Auto-sync
+  syncToSupabase();
+}
+
+// ============================================================
+// EXTRACT ARRAY - Navigate nested JSON to find arrays
+// ============================================================
+function extractArray(obj, paths) {
+  for (var i = 0; i < paths.length; i++) {
+    var val = obj;
+    var parts = paths[i].split('.');
+    for (var j = 0; j < parts.length; j++) {
+      if (val && val[parts[j]] !== undefined) val = val[parts[j]];
+      else { val = null; break; }
+    }
+    if (Array.isArray(val) && val.length > 0) return val;
+  }
+  // If no path worked, check if obj itself is an array
+  if (Array.isArray(obj)) return obj;
+  // Check direct children
+  for (var key in obj) {
+    if (Array.isArray(obj[key]) && obj[key].length > 0) return obj[key];
+  }
+  return [];
+}
+
+// ============================================================
+// SHOW STATS
+// ============================================================
+function showStats(records) {
+  document.getElementById('stats-card').style.display = 'block';
+  document.getElementById('stats-area').innerHTML = 
+    '<div class="stat-item"><div class="num">' + records.companies.length + '</div><div class="lbl">Companies</div></div>' +
+    '<div class="stat-item"><div class="num">' + records.contacts.length + '</div><div class="lbl">Contacts</div></div>' +
+    '<div class="stat-item"><div class="num">' + records.projects.length + '</div><div class="lbl">Projects</div></div>';
+}
+
+// ============================================================
+// SYNC TO SUPABASE (primary) + scout.bluejax.ai (backup)
+// ============================================================
+async function syncToSupabase() {
+  // *** FULLY CLIENT-SIDE — No backend needed ***
+  // Data is parsed and ready. Offer download options.
+  if (!parsedRecords || (!parsedRecords.companies.length && !parsedRecords.projects.length)) {
+    log('No records extracted. Browse more PlanHub pages first.', 'warn');
+    return;
+  }
+  
+  document.getElementById('sync-btn').style.display = 'block';
+  
+  // Show download buttons
+  var dlArea = document.createElement('div');
+  dlArea.id = 'download-area';
+  dlArea.innerHTML = 
+    '<button class="btn btn-green" onclick="downloadJSON()" style="margin-bottom:8px">📁 Download Full JSON</button>' +
+    '<button class="btn btn-blue" onclick="downloadCSV()" style="margin-bottom:8px">📊 Download Companies CSV</button>' +
+    '<button class="btn btn-purple" onclick="downloadProjectsCSV()">📋 Download Projects CSV</button>';
+  
+  // Only add once
+  if (!document.getElementById('download-area')) {
+    document.getElementById('sync-btn').parentElement.insertBefore(dlArea, document.getElementById('sync-btn'));
+  }
+  
+  log('━━━ DATA READY ━━━', 'info');
+  log(parsedRecords.companies.length + ' companies, ' + 
+      parsedRecords.contacts.length + ' contacts, ' + 
+      parsedRecords.projects.length + ' projects extracted', 'ok');
+  log('Use the download buttons above to save your data.', 'info');
+  
+  // Also save to localStorage as backup
+  try {
+    var key = 'scout_data_' + Date.now();
+    localStorage.setItem(key, JSON.stringify(parsedRecords));
+    var allKeys = Object.keys(localStorage).filter(k => k.startsWith('scout_data_'));
+    log('💾 Saved to local storage (backup #' + allKeys.length + ')', 'ok');
+  } catch(e) {
+    log('localStorage save failed (non-critical): ' + e.message, 'warn');
+  }
+}
+
+function downloadJSON() {
+  var json = JSON.stringify(parsedRecords, null, 2);
+  var blob = new Blob([json], {type: 'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'scout_' + new Date().toISOString().slice(0,10) + '_' + Date.now() + '.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  log('📁 JSON file downloaded!', 'ok');
+}
+
+function downloadCSV() {
+  if (!parsedRecords.companies.length) { alert('No companies to export'); return; }
+  var headers = ['planhub_id','company_name','email','phone','address','city','state','zip','website','source'];
+  var rows = [headers.join(',')];
+  parsedRecords.companies.forEach(function(c) {
+    var row = headers.map(function(h) {
+      var val = (c[h] || '').toString().replace(/"/g, '""');
+      return '"' + val + '"';
+    });
+    rows.push(row.join(','));
+  });
+  var csv = rows.join('\n');
+  var blob = new Blob([csv], {type: 'text/csv'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'scout_companies_' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  log('📊 Companies CSV downloaded!', 'ok');
+}
+
+function downloadProjectsCSV() {
+  if (!parsedRecords.projects.length) { alert('No projects to export'); return; }
+  var headers = ['planhub_id','name','city','state','zip','status','building_use','gc_name','estimated_value'];
+  var rows = [headers.join(',')];
+  parsedRecords.projects.forEach(function(p) {
+    var row = headers.map(function(h) {
+      var val = (p[h] || '').toString().replace(/"/g, '""');
+      return '"' + val + '"';
+    });
+    rows.push(row.join(','));
+  });
+  var csv = rows.join('\n');
+  var blob = new Blob([csv], {type: 'text/csv'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'scout_projects_' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  log('📋 Projects CSV downloaded!', 'ok');
+}
+
+// ============================================================
+// COPY RAW DATA
+// ============================================================
+function copyRaw() {
+  var text = document.getElementById('raw-output').value;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      alert('Copied ' + text.length + ' characters!');
+    });
+  } else {
+    var ta = document.getElementById('raw-output');
+    ta.focus();
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    document.execCommand('copy');
+    alert('Copied!');
+  }
+}
+
+// ============================================================
+// LOGGING
+// ============================================================
+function log(msg, type) {
+  var el = document.getElementById('log');
+  var cls = type === 'ok' ? 's-ok' : type === 'fail' ? 's-fail' : type === 'warn' ? 's-warn' : 's-info';
+  var icon = type === 'ok' ? '✅' : type === 'fail' ? '❌' : type === 'warn' ? '⚠️' : 'ℹ️';
+  var time = new Date().toLocaleTimeString();
+  var line = '<div><span style="color:#555">' + time + '</span> <span class="' + cls + '">' + icon + ' ' + msg + '</span></div>';
+  
+  if (el.innerHTML.indexOf('Waiting for data') > -1) {
+    el.innerHTML = line;
+  } else {
+    el.innerHTML += line;
+  }
+  el.scrollTop = el.scrollHeight;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+checkHash();
+</script>
+
+</body>
+</html>

