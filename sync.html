@@ -176,6 +176,27 @@ function handleChunk(params) {
 }
 
 // ============================================================
+// MESSAGE HANDLER (for postMessage method avoiding URL limits)
+// ============================================================
+window.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'SCOUT_DATA') {
+    document.getElementById('auto-card').style.display = 'block';
+    var status = document.getElementById('auto-status');
+    status.innerHTML = '✅ Data received via direct message!';
+    log('Received payload via postMessage (' + (e.data.payload.length || 0) + ' bytes)', 'info');
+    try {
+      var data = typeof e.data.payload === 'string' ? JSON.parse(e.data.payload) : e.data.payload;
+      processData(data);
+    } catch(err) {
+      log('Parse error: ' + err.message, 'fail');
+    }
+  }
+});
+if (window.opener) {
+  try { window.opener.postMessage('SYNC_READY', '*'); } catch(e) {}
+}
+
+// ============================================================
 // PASTE HANDLER
 // ============================================================
 function processPaste() {
