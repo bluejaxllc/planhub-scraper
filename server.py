@@ -93,7 +93,7 @@ def require_auth():
         return # Auth disabled
     
     # Allow health check, receive, pixel, push, and bookmark setup to bypass auth
-    bypass_paths = ["/", "/sync.html", "/api/health", "/api/receive", "/api/enrich/push", "/api/px", "/static/bookmark.html", "/api/scout/token", "/api/scout/refresh", "/api/scrape.js", "/api/diag.js"]
+    bypass_paths = ["/", "/sync.html", "/api/health", "/api/receive", "/api/enrich/push", "/api/px", "/static/bookmark.html", "/api/scout/token", "/api/scout/refresh", "/api/scrape.js", "/api/diag.js", "/api/scout/inbox"]
     if request.path in bypass_paths:
         return
         
