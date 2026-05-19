@@ -41,6 +41,14 @@ def add_cors_headers(response):
 def handle_options(path):
     return "", 200
 
+@app.route("/")
+def index():
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), 'index.html')
+
+@app.route("/sync.html")
+def sync_page():
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), 'sync.html')
+
 @app.route("/api/get_dump")
 def get_dump():
     conn = get_db()
@@ -85,7 +93,7 @@ def require_auth():
         return # Auth disabled
     
     # Allow health check, receive, pixel, push, and bookmark setup to bypass auth
-    bypass_paths = ["/api/health", "/api/receive", "/api/enrich/push", "/api/px", "/static/bookmark.html", "/api/scout/token", "/api/scout/refresh", "/api/scrape.js", "/api/diag.js"]
+    bypass_paths = ["/", "/sync.html", "/api/health", "/api/receive", "/api/enrich/push", "/api/px", "/static/bookmark.html", "/api/scout/token", "/api/scout/refresh", "/api/scrape.js", "/api/diag.js"]
     if request.path in bypass_paths:
         return
         
