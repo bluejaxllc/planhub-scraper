@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0a0a1a"/>
+      <stop offset="100%" stop-color="#111128"/>
+    </linearGradient>
+    <linearGradient id="bar1" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#60a5fa"/>
+    </linearGradient>
+    <linearGradient id="bar2" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+    <linearGradient id="bar3" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="96" fill="none" stroke="#ffffff" stroke-opacity="0.08" stroke-width="4"/>
+  <!-- Signal Bars -->
+  <rect x="100" y="280" width="80" height="140" rx="16" fill="url(#bar1)"/>
+  <rect x="216" y="180" width="80" height="240" rx="16" fill="url(#bar2)"/>
+  <rect x="332" y="92" width="80" height="328" rx="16" fill="url(#bar3)"/>
+  <!-- Subtle glow -->
+  <rect x="100" y="280" width="80" height="140" rx="16" fill="#60a5fa" opacity="0.15" filter="blur(8px)"/>
+  <rect x="216" y="180" width="80" height="240" rx="16" fill="#818cf8" opacity="0.15" filter="blur(8px)"/>
+  <rect x="332" y="92" width="80" height="328" rx="16" fill="#a78bfa" opacity="0.15" filter="blur(8px)"/>
+</svg>

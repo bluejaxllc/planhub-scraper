@@ -1,0 +1,17 @@
+{
+    "name": "Scout Intelligence",
+    "short_name": "Scout",
+    "description": "Multi-Sector Intelligence Dashboard — Recruiting & Lead Intelligence",
+    "start_url": "/dashboard",
+    "display": "standalone",
+    "background_color": "#0a0a1a",
+    "theme_color": "#0a0a1a",
+    "icons": [
+        {
+            "src": "/favicon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

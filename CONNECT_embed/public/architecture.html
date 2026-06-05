@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scout Application Architecture map</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #030303;
+            color: #ffffff;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        p {
+            color: #a3a3a3;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .graph-container {
+            width: 100%;
+            max-width: 1400px;
+            background-color: #0a0a0a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 0 80px rgba(99, 102, 241, 0.15);
+            overflow: visible;
+            /* allows native zooming to work perfectly */
+        }
+
+        /* Tip to user */
+        .zoom-tip {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            color: #c7d2fe;
+            padding: 12px 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Custom Mermaid styling to enforce large bounds */
+        svg {
+            width: 100% !important;
+            height: auto !important;
+            min-width: 1000px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Scout Platform Map</h1>
+    <p>Hold Ctrl (or Cmd) and scroll to zoom in/out freely!</p>
+
+    <div class="graph-container">
+        <div class="mermaid">
+            graph TD
+
+            %% STYLES
+            classDef publicFill fill:#0d9488,stroke:#115e59,stroke-width:2px,color:#fff,font-weight:bold
+            classDef dashboardFill fill:#4f46e5,stroke:#3730a3,stroke-width:3px,color:#fff,font-weight:bold
+            classDef personaFill fill:#c026d3,stroke:#86198f,stroke-width:2px,color:#fff,font-weight:bold
+            classDef sectorFill fill:#ea580c,stroke:#9a3412,stroke-width:2px,color:#fff
+            classDef backendFill fill:#2563eb,stroke:#1e40af,stroke-width:2px,color:#fff
+            classDef washFill fill:#059669,stroke:#047857,stroke-width:3px,color:#fff,stroke-dasharray: 4 4
+            classDef algoliaFill fill:#be185d,stroke:#9d174d,stroke-width:2px,color:#fff
+
+            %% NODES
+            Public((Public Web Web)):::publicFill
+            Home[Landing Page HQ]:::publicFill
+            OilGas[Oil & Gas Landing]:::publicFill
+            Login[Authentication Gateway]:::publicFill
+
+            Dashboard((Scout App Router)):::dashboardFill
+
+            %% Personas (Trimmed feature creep)
+            Admin((Super Admin)):::personaFill
+            Client((Paying Client: Recruiter / GC)):::personaFill
+
+            %% Admin View
+            Admin_Overview[Intelligence Overview & System Health]:::sectorFill
+            Admin_Camp[Campaign Studio Manager]:::sectorFill
+            Admin_Tools[Scraper Registry & Monitor]:::sectorFill
+
+            %% Client View
+            Client_Leads[Sales Leads Feed]:::sectorFill
+            Client_Talent[Recruiting Feed & Talent Pools]:::sectorFill
+
+            L_Const[Construction / Planhub]:::sectorFill
+            L_OilGas[Oil & Gas Sales]:::sectorFill
+
+            R_Const[Construction Talent]:::sectorFill
+            R_Elec[Electrical]:::sectorFill
+            R_Mech[Mechanical]:::sectorFill
+            R_Oil[Oil & Gas Roles]:::sectorFill
+            R_Telecom[Telecom & IT]:::sectorFill
+
+            %% Database & Processing
+            Scraper(Scraper Engines: Node / Playwright / Python):::backendFill
+            Staging[(Raw Scraped DB Bucket)]:::backendFill
+            Washing[The Washing Machine: Entity Resolution & 360° Linkages]:::washFill
+            DB[(Live Production PostgreSQL)]:::backendFill
+            Search_API((Server-Side Pagination / Search Algolia / RPCs)):::algoliaFill
+
+            %% CONNECTIONS
+            Public --> Home
+            Public --> OilGas
+            Public --> Login
+            Login -->|Auth JWT| Dashboard
+
+            Dashboard -->|Admin Route| Admin
+            Dashboard -->|Client Route| Client
+
+            %% Private Admin Flow
+            Admin --> Admin_Overview
+            Admin_Overview --> Admin_Tools
+            Admin_Overview --> Admin_Camp
+
+            %% Paying Customer Flow
+            Client --> Client_Leads
+            Client_Leads -.->|Lead Feeds| L_Const
+            Client_Leads -.->|Lead Feeds| L_OilGas
+
+            Client --> Client_Talent
+            Client_Talent -.->|Talent Pools| R_Const
+            Client_Talent -.->|Talent Pools| R_Elec
+            Client_Talent -.->|Talent Pools| R_Mech
+            Client_Talent -.->|Talent Pools| R_Oil
+            Client_Talent -.->|Talent Pools| R_Telecom
+
+            %% Data Flow (Washing Machine implementation)
+            Scraper -.->|Push raw HTML/JSON| Staging
+            Staging -->|Cron deduplicate & link to projects| Washing
+            Washing -->|Injects 360° mapped datasets| DB
+
+            %% Frontend Limits
+            DB -->|Indexes 1M+ rows| Search_API
+            Search_API -->|Sends 50-100 rows per view| Client_Leads
+            Search_API -->|Sends 50-100 rows per view| Client_Talent
+        </div>
+    </div>
+
+    <div class="zoom-tip">
+        Ctrl + MouseWheel to zoom
+    </div>
+
+    <!-- Load Mermaid JavaScript -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            securityLevel: 'loose',
+            logLevel: 'error',
+            flowchart: { curve: 'basis', padding: 25 }
+        });
+    </script>
+</body>
+
+</html>

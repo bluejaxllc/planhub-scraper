@@ -1,0 +1,288 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Dark Mode (Default) ── */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #030303;
+  color: #e5e5e5;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(99, 102, 241, 0.3);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* ══════════════════════════════════
+   LIGHT MODE OVERRIDES
+   Triggered by data-theme="light" on <html>
+   ══════════════════════════════════ */
+
+/* --- Page & Body Backgrounds --- */
+html[data-theme="light"],
+html[data-theme="light"] body {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+/* --- Main layout wrapper --- */
+html[data-theme="light"] .min-h-screen.bg-\[\#030303\] {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+/* --- Sidebar --- */
+html[data-theme="light"] aside {
+  background: #fafafa !important;
+  border-color: #d1d5db !important;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06) !important;
+}
+
+html[data-theme="light"] aside .border-b,
+html[data-theme="light"] aside .border-t {
+  border-color: #d1d5db !important;
+}
+
+html[data-theme="light"] aside .text-white {
+  color: #111827 !important;
+}
+
+html[data-theme="light"] aside .text-neutral-400,
+html[data-theme="light"] aside .text-neutral-500 {
+  color: #4b5563 !important;
+}
+
+html[data-theme="light"] aside a:hover {
+  background: rgba(99, 102, 241, 0.08) !important;
+}
+
+/* --- All Cards & Panels --- */
+html[data-theme="light"] [class*="bg-[#070707]"],
+html[data-theme="light"] [class*="bg-\[#070707\]"] {
+  background: #ffffff !important;
+  border-color: #d1d5db !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+}
+
+html[data-theme="light"] [class*="bg-[#0a0a0a]"],
+html[data-theme="light"] [class*="bg-\[#0a0a0a\]"] {
+  background: #f3f4f6 !important;
+  border-color: #d1d5db !important;
+}
+
+/* --- Tables --- */
+html[data-theme="light"] table {
+  color: #111827 !important;
+}
+
+html[data-theme="light"] thead tr {
+  border-color: #d1d5db !important;
+  background: #f9fafb !important;
+}
+
+html[data-theme="light"] tbody tr {
+  border-color: #e5e7eb !important;
+}
+
+html[data-theme="light"] tbody tr:hover {
+  background: rgba(99, 102, 241, 0.06) !important;
+}
+
+/* --- Text Color Overrides --- */
+html[data-theme="light"] .text-white {
+  color: #111827 !important;
+}
+
+html[data-theme="light"] .text-neutral-200 {
+  color: #1f2937 !important;
+}
+
+html[data-theme="light"] .text-neutral-300 {
+  color: #374151 !important;
+}
+
+html[data-theme="light"] .text-neutral-400 {
+  color: #4b5563 !important;
+}
+
+html[data-theme="light"] .text-neutral-500 {
+  color: #6b7280 !important;
+}
+
+html[data-theme="light"] .text-neutral-600 {
+  color: #6b7280 !important;
+}
+
+html[data-theme="light"] .text-neutral-700 {
+  color: #9ca3af !important;
+}
+
+/* --- Border Overrides --- */
+html[data-theme="light"] .border-white\/5,
+html[data-theme="light"] .border-white\/10,
+html[data-theme="light"] [class*="border-white/5"],
+html[data-theme="light"] [class*="border-white/10"] {
+  border-color: #d1d5db !important;
+}
+
+html[data-theme="light"] .divide-white\/5>*+*,
+html[data-theme="light"] [class*="divide-white/"]>*+* {
+  border-color: #e5e7eb !important;
+}
+
+/* --- Background Overrides --- */
+html[data-theme="light"] .bg-white\/5,
+html[data-theme="light"] [class*="bg-white/5"] {
+  background: rgba(0, 0, 0, 0.06) !important;
+}
+
+html[data-theme="light"] .bg-white\/10,
+html[data-theme="light"] [class*="bg-white/10"] {
+  background: rgba(0, 0, 0, 0.08) !important;
+}
+
+html[data-theme="light"] .bg-white\/\[0\.02\],
+html[data-theme="light"] .bg-white\/\[0\.03\] {
+  background: rgba(0, 0, 0, 0.03) !important;
+}
+
+html[data-theme="light"] .bg-black {
+  background: #ffffff !important;
+}
+
+html[data-theme="light"] .bg-black\/50 {
+  background: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* --- Inputs --- */
+html[data-theme="light"] input,
+html[data-theme="light"] select,
+html[data-theme="light"] textarea {
+  background: #f9fafb !important;
+  color: #111827 !important;
+  border-color: #d1d5db !important;
+}
+
+html[data-theme="light"] input::placeholder,
+html[data-theme="light"] textarea::placeholder {
+  color: #9ca3af !important;
+}
+
+html[data-theme="light"] input:focus,
+html[data-theme="light"] select:focus {
+  border-color: rgba(99, 102, 241, 0.6) !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15) !important;
+}
+
+/* --- Stat Cards (top row) --- */
+html[data-theme="light"] [class*="from-[#0a0a0f]"],
+html[data-theme="light"] [class*="to-[#111118]"] {
+  background: #ffffff !important;
+}
+
+/* --- Modals --- */
+html[data-theme="light"] .bg-black\/70,
+html[data-theme="light"] .bg-black\/60 {
+  background: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* --- Scrollbar --- */
+html[data-theme="light"] ::-webkit-scrollbar {
+  width: 8px;
+}
+
+html[data-theme="light"] ::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+html[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 4px;
+}
+
+/* --- Selection --- */
+html[data-theme="light"] ::selection {
+  background: rgba(99, 102, 241, 0.2);
+}
+
+/* --- Gradient stat cards in overview --- */
+html[data-theme="light"] [class*="bg-gradient-to-br"] {
+  opacity: 0.95;
+}
+
+/* --- Accordion contractor cards --- */
+html[data-theme="light"] [class*="bg-white/[0.03]"] {
+  background: #f9fafb !important;
+  border-color: #e5e7eb !important;
+}
+
+/* --- Mobile menu overlay --- */
+html[data-theme="light"] .backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+/* --- Keep colored badges and chips readable --- */
+html[data-theme="light"] [class*="bg-emerald-500/10"],
+html[data-theme="light"] [class*="bg-cyan-500/10"],
+html[data-theme="light"] [class*="bg-indigo-500/10"],
+html[data-theme="light"] [class*="bg-violet-500/10"],
+html[data-theme="light"] [class*="bg-amber-500/10"],
+html[data-theme="light"] [class*="bg-rose-500/10"],
+html[data-theme="light"] [class*="bg-orange-500/10"],
+html[data-theme="light"] [class*="bg-blue-500/10"],
+html[data-theme="light"] [class*="bg-red-500/10"],
+html[data-theme="light"] [class*="bg-purple-500/10"] {
+  background-color: rgba(99, 102, 241, 0.08) !important;
+}
+
+/* Range slider thumb styling */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #f59e0b;
+  cursor: pointer;
+  border: 2px solid #030303;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #f59e0b;
+  cursor: pointer;
+  border: 2px solid #030303;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+}
+
+html[data-theme="light"] input[type="range"]::-webkit-slider-thumb {
+  border-color: #ffffff;
+}
+
+html[data-theme="light"] input[type="range"]::-moz-range-thumb {
+  border-color: #ffffff;
+}
+
+/* Theme toggle button animation */
+.theme-toggle-btn {
+  transition: transform 0.3s ease, background-color 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  transform: scale(1.1);
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.95);
+}
